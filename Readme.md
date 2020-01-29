@@ -51,7 +51,7 @@ to be called from Hidrografia folder. Edit the datafile indicating the name of .
 run n times (n=sections number) if shoosed the option of saving each section in one .mat file
 
 ### TS diagram for the selected .mat file
-call DiagramaTS.m from Hidrografia folder. 
+call DiagramaTS.m from Hidrografia folder.
 Use the .mat file created with CreaSecCTD.m
 Edit the datafile (.mat file for each section or unique .mat file) and edit zones limits and names (if sections was changed)
 
@@ -60,14 +60,14 @@ Edit the datafile (.mat file for each section or unique .mat file) and edit zone
 Edit line where the data is loaded, for each section to be carried out.
 Data=load('Ra1903Norte');
 for a new section, we need to create a bathymetric profile first, calling CreaBatimetriaRadial.m from Hidrografia folder
-edit FileData (section .mat file), and opciones ('z' for zonal and 'm' for meridional). once done, go back to secciones.mat 
+edit FileData (section .mat file), and opciones ('z' for zonal and 'm' for meridional). once done, go back to secciones.mat
 and edit Data, SVOpciones.tipo and SVOpciones.batymetry (.m bathymetry file just created with CreaBatimetriaRadial.m)
 
 ### Compare with previous CTD stations.
 ComparaEstacionesPrevias.m
 
 ## Transport estimates.
-Transport estimates are computed in [Campanha]/Analisis/Transporte folder 
+Transport estimates are computed in [Campanha]/Analisis/Transporte folder
 (all the following scripts/functions must be called from this folder)
 
 First, it is necesary to modify the configuration files
@@ -101,8 +101,8 @@ iCapaSuperior=1:3;
 iCapaIntermedia=4:6;
 iCapaProfunda=7:12;
 Edit the call to get_stas_[campanha] (line 26)
-
-comment lines 18 to20 if reference level is not calculated yet. If it's the case, uncomment line 21.
+```
+Comment lines 18 to20 if reference level is not calculated yet. If it's the case, uncomment line 21.
 
 ## LADCP data procesing
 
