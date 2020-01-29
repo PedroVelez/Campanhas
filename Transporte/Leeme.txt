@@ -1,0 +1,5 @@
+El convenio es la velocidad será positiva, a la izquierda del orden al que se han puesto las estaciones. Por ejemplo, en el caso de una sección Oeste-Este, y si ordenamos las estaciones de oeste a este, el transporte será positivo hacia el norte. 
+
+El convenio de signos para los transportes acumulados es que hacia fuera de la caja es positivo. De modo que el trans_oeste (u positiva hacia el este) debo multiplicarlo por menos para que sea positivo hacia fuera.  Similarmente ocurre en el tramo sur.
+
+

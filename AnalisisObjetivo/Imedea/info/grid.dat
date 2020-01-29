@@ -1,0 +1,30 @@
+Data file about the domain and the grid, programs using this file:
+ C_PRES ,  ANALISIS , GEOPSUM , VAR_DERIVA , VER , OMEGA_INV .
+
+XLON1, XLAT1   ,  coordenates of the low left square of the domain (degrees)
+-42, 24 
+
+ALFO           ,  orientation: the zone can be delimited by meridians and
+  0.           ,  parallels (ALFO=0.) or can be tilted an angle ALFO (degrees)
+
+ NL , NF , NC  ,  number of levels, rows and columns
+ 100 , 7 , 24
+
+ XARM , YARM   ,  cell size (in degrees if ALFO=0., if not in KM
+1, 1
+
+Z0(STO),ZINT(STINT)    ,  upper level and level interval
+   5. ,  20.
+
+ NA      STUDA       ,  root name of the used data (a4) and study area (a8)
+gyro,gyroscop
+
+------------------------------------------------------------------------------
+
+ATENTION !!!: in the chosen domain, in the graphic representation
+              two files and two columns by side will be lost (the
+              exterior ones):   4 files and 4 columns .
+
+              So it has to considereted that you must choose a bigger domain
+              than the one you need.
+-----------------------------------------------------------------------------
