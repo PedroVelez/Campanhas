@@ -9,8 +9,9 @@ x0=-13.8933;y0=28.2256;
 
 xf=[-13.0563 -13.1629 -13.2695 -13.3752 -13.4690 -13.5822 -13.6735 -13.7674 -13.8349 -13.8933];
 yf=xf.*m-x0*m+y0;
+
 for ii=1:length(yf)
-       fprintf('%03d       ,%7.4f,   %7.4f,1\n ',24+ii,xf(ii),yf(ii))
+       fprintf('%03d       ;%7.4f;   %7.4f;1\n ',24+ii,xf(ii),yf(ii))
 end
 
 %Calculos en latitud

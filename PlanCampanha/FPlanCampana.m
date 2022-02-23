@@ -4,7 +4,7 @@ function DataOut=FPlanCampana(Op)
 %----Cruise plan
 % The cruise plan is in a file named strcat('Estaciones',Op.Cruise,'.csv')
 % for example: 'EstacionesRaprocan1810.csv'.
-% It will a line for operation, with the folliwing format:
+% It will have a line for operation, with the folliwing format:
 % Name of the station;longitude in decial degrees;latitude in decimal degrees;type of operation
 % for exacmple; 24;-18.4963;29.1667;1
 %
@@ -73,6 +73,8 @@ function DataOut=FPlanCampana(Op)
 
 
 %% Begining
+fprintf('>>>>>Cruise plan for: %s, ',Op.Cruise)
+
 OperationID{11} ='Operations'    ; % <0 Parados tiempo en days
 OperationID{10} ='Depart. port'  ; % 0 Puerto de Salida
 OperationID{ 9} ='Arrival port'  ; % 9 Puerto de llegada
@@ -89,9 +91,11 @@ if isfield(Op,'BatimetryIsoLabel')==0;Op.BatimetryIsoLabel=[1 1 1];end
 if isfield(Op,'DailyOperation')==0;Op.DailyAOperation=0;end
 if isfield(Op,'ImagenSatelite')==0;Op.ImagenSatelite=0;end
 if isfield(Op,'MoorTick')==0;Op.MoorTick=1;end
+if isfield(Op,'Plot3d')==0;Op.Plot3d=0;end
 if isfield(Op,'Proj')==0;Op.Proj='mercator';end
 if isfield(Op,'Subtitle')==0;Op.Subtitle=1;end
 if isfield(Op,'VelocityVessel')==0;Op.VelocityVessel=9;end
+if isfield(Op,'Ruler')==0;Op.Ruler=1;end
 if isfield(Op,'VelocityCTD')==0;Op.VelocityCTD=55;end
 if isfield(Op,'VelocityGC')==0;Op.VelocityGC=50;end
 if isfield(Op,'VelocityBC')==0;Op.VelocityBC=50;end
@@ -100,6 +104,7 @@ if isfield(Op,'DepthROV')==0;Op.DepthROV=1500;end
 if isfield(Op,'DailyAOperation')==0;Op.DailyAOperation=0.0;end
 if isfield(Op,'ZEE')==0;Op.ZEE=0;end
 
+keyboard
 %% Load regional settings
 if isfield(Op,'Region')
     if exist('Globales.mat')== 2
@@ -154,16 +159,24 @@ fprintf('%d stations \n',length(indiceEST))
 PointDepth=PointLon*0;
 
 %Compute bottom depth at the stations
+%%Cuidado con el 360
 for ii=1:length(indiceEST)
-    PointDepth(indiceEST(ii))=-BAT.elevations( ...
-        Locate(BAT.batylat,PointLat(indiceEST(ii))), ...
-        Locate(BAT.batylon,PointLon(indiceEST(ii))+360));
+    if max(PointLon)<180
+        PointDepth(indiceEST(ii))=-BAT.elevations( ...
+            Locate(BAT.batylat,PointLat(indiceEST(ii))), ...
+            Locate(BAT.batylon,PointLon(indiceEST(ii))+360));
+    else
+        PointDepth(indiceEST(ii))=-BAT.elevations( ...
+            Locate(BAT.batylat,PointLat(indiceEST(ii))), ...
+            Locate(BAT.batylon,PointLon(indiceEST(ii))));
+    end
 end
 IMooring=find(PointID==7 | PointID==8);
 for ii=1:length(IMooring)
-    PointDepth(IMooring(ii))=-BAT.elevations(...
+    PointDepth(IMooring(ii))=BAT.elevations(...
         Locate(BAT.batylat,PointLat(IMooring(ii))), ...
-        Locate(BAT.batylon,PointLon(IMooring(ii))+360));
+        Locate(BAT.batylon,PointLon(IMooring(ii))));
+    %Locate(BAT.batylon,PointLon(IMooring(ii))+360));
 end
 
 lonPg=fix(PointLon);
@@ -178,7 +191,6 @@ m_proj(Op.Proj, ...
 
 if Op.ImagenSatelite==1 %Anado iamgen de satelite si hay
     D=AddImageSatelite(Op.ImagenSateliteType,Op.ImagenSateliteDayi,GlobalDS);
-    
     tituloIs=sprintf('%s %s',D.instrument,D.platform);
     tituloVarIs=sprintf('%s\n(%s)',D.long_name,D.units);
     tituloFechaIs=sprintf('%s:%s',D.TimeStart(1:10),D.TimeEnd(1:10));
@@ -186,14 +198,15 @@ if Op.ImagenSatelite==1 %Anado iamgen de satelite si hay
         D.instrument,D.platform,D.standard_name,D.TimeStart(1:10),D.TimeEnd(1:10));
 end
 
-
+%Batimetry
 if Op.BatimetryColor==1 && Op.ImagenSatelite==0
     if Op.LonEConvMap==0
-        [CS,CH]=m_contourf(BAT.batylon,BAT.batylat,BAT.elevations,40,'edgecolor','none');hold on
+        [CS,CH]=m_contourf(BAT.batylon-360,BAT.batylat,BAT.elevations,40,'edgecolor','none');hold on
     else
         [CS,CH]=m_contourf(BAT.batylon,BAT.batylat,BAT.elevations,40,'edgecolor','none');hold on
     end
     caxis([min(min(BAT.elevations)) 0])
+    colorbar
     colormap(m_colmap('blues'));
     set(gcf,'color','w');
 end
@@ -224,13 +237,14 @@ if isfield(Op,'BoxCoor')
         else
             ColBox='y';
         end
-        
         m_line(Op.BoxCoor.X{ic}, Op.BoxCoor.Y{ic},'color',ColBox,'linewidth',2)
     end
 end
 
-
 m_grid('linestyle',':','fontsize',10)
+if Op.Ruler==1
+    m_ruler([.05 .35],.95,'tickdir','out','ticklen',[.007 .007]);
+end
 m_usercoast(GlobalDS.filecoast,'patch',[.7 .6 .4,],'edgecolor',[.7 .6 .4,]);
 
 %Define color for the marks. It changes depending on the background color
@@ -280,8 +294,10 @@ for ii=1:length(PointLon)
                 'MarkerEdgeColor',mec,'MarkerFaceColor',mfc);
         end
     elseif PointID(ii)==2
-        m_plot(PointLon(ii)+Op.LonEConvMap,PointLat(ii), ...
-            'marker','o','markersize',2,'MarkerEdgeColor',mec,'MarkerFaceColor',mfc);
+        if Op.VesselTrack==1
+            m_plot(PointLon(ii)+Op.LonEConvMap,PointLat(ii), ...
+                'marker','.','markersize',2,'MarkerEdgeColor',mec,'MarkerFaceColor',mfc);
+        end
     elseif PointID(ii)==7
         m_plot(PointLon(ii)+Op.LonEConvMap,PointLat(ii), ...
             'marker','v','markersize',msmo,'MarkerEdgeColor','k','MarkerFaceColor','y');
@@ -590,11 +606,15 @@ end
 
 %% Añadir ZEEs
 if Op.ZEE==1
-    fprintf(    'Addin ZEEs');
-    load Globales
-    S=shaperead(strcat(GlobalSU.DatPath,'/Costa/WorldEEZ/eez_v10.shp'));
-    for i1=1:length(S)
-        m_plot(S(i1).X+Op.LonEConvMap,S(i1).Y,'-','color',[0.75 0.75 0.75]);hold on
+    fprintf(    'Adding ZEEs');
+    load('Globales.mat','GlobalSU')
+    if exist(strcat(GlobalSU.DatPath,'/Costa/WorldEEZ/eez_v10.shp'),'file')==2
+        S=shaperead(strcat(GlobalSU.DatPath,'/Costa/WorldEEZ/eez_v10.shp'));
+        for i1=1:length(S)
+            m_plot(S(i1).X+Op.LonEConvMap,S(i1).Y,'-','color',[0.75 0.75 0.75]);hold on
+        end
+    else
+        fprintf(    'There is not .shp file in GlobalSU.DatPath/Costa/WorldEEZ/eez_v10.shp');
     end
 end
 
@@ -619,11 +639,11 @@ if isfield(Op,'XL1') && isfield(Op,'YL1') &&  isfield(Op,'XL2') && isfield(Op,'Y
     m_text(Op.XL2,Op.YL2,Subtitulo , ...
         'Interpreter','none','HorizontalAlignment','center','FontSize',12);
 else
-    title(titulo)
+    title(titulo,'interpreter','none')
     xlabel(Subtitulo);
 end
 
-%Add Logo
+%% Add Logo
 if isfield(Op,'Logo')
     if Op.Logo==1
         LogoIEO;
@@ -663,14 +683,13 @@ fprintf('     >%4.2f days since departure\n',(now-Op.DepartingDate))
 fclose(fid);
 
 %% Output data
-%Output
 DataOut.Nombre=PointName;
 DataOut.Lon=PointLon;
 DataOut.Lat=PointLat;
 DataOut.Codigo=PointID;
 DataOut.Profundidad=PointDepth;
 
-% Google earth
+%% Google earth
 if isfield(Op,'OutputGEarth')==1
     if Op.OutputGEarth==1
         imagesdir=which(mfilename);
@@ -680,7 +699,7 @@ if isfield(Op,'OutputGEarth')==1
     end
 end
 
-% GPX
+%% GPX
 if isfield(Op,'OutputGPX')==1
     fid = fopen(strcat('PlanCampanha',Op.Cruise,'.gpx'),'w');
     fprintf(fid,'<?xml version="1.0"?>\n');
@@ -696,7 +715,44 @@ if isfield(Op,'OutputGPX')==1
     fprintf(fid, '</gpx>\n');
 end
 
-%Save mat file
+
+%% Save mat file
+if Op.Plot3d==1
+    figure
+    surf(BAT.batylon,BAT.batylat,BAT.elevations);hold on
+    shading interp
+    axis([Op.lon_min Op.lon_max Op.lat_min Op.lat_max]);
+    for i1=1:length(PointLon)
+        if PointID(i1) == 1
+            plot3([PointLon(i1) PointLon(i1)],[PointLat(i1) PointLat(i1)],[0 PointDepth(i1)],'-k')
+            plot3([PointLon(i1) PointLon(i1)],[PointLat(i1) PointLat(i1)],[0 0],'ko','markerfacecolor','k')
+            plot3([PointLon(i1) PointLon(i1)],[PointLat(i1) PointLat(i1)],[0 PointDepth(i1)],'k.','markerfacecolor','k')
+        end
+    end
+    caxis([min(min(BAT.elevations)) 0])
+    colorbar
+    colormap(m_colmap('blues'));
+    set(gcf,'color','w');
+    
+    if Op.Batimetry==1
+        Op.BatimetryIso=sort(Op.BatimetryIso,'descend');
+        cbiso=linspace(0.5,1,length(Op.BatimetryIso));
+        for iiso=1:length(Op.BatimetryIso)
+            if Op.LonEConvMap==0
+                [C,h]=contour3(BAT.batylon,BAT.batylat,BAT.elevations, ...
+                    [Op.BatimetryIso(iiso) Op.BatimetryIso(iiso)],'color',cbiso(iiso)*[1 1 1]);
+            else
+                [C,h]=contour3(BAT.batylon,BAT.batylat,BAT.elevations,...
+                    [Op.BatimetryIso(iiso) Op.BatimetryIso(iiso)],'color',cbiso(iiso)*[1 1 1]);
+            end
+            if Op.BatimetryIsoLabel(iiso)==1
+                clabel(C,h,'FontSize',9,'LabelSpacing',500,'Color',cbiso(iiso)*[1 1 1])
+            end
+        end
+    end
+end
+
+%% Save mat file
 if isfield(Op,'OutputMat')==1
     if Op.OutputMat==1
         save(strcat('PlanCampanha',Op.Cruise))
@@ -706,12 +762,16 @@ end
 %% Create figures
 if isfield(Op,'OutputFigures')==1
     orient landscape;CreaFigura(1,strcat('PlanCampanha',Op.Cruise),Op.OutputFigures);
+    if Op.Plot3d==1
+        orient landscape;CreaFigura(2,strcat('PlanCampanha',Op.Cruise,'3D'),Op.OutputFigures);
+    end
 end
+
 
 end
 
-%--------------------------------------------------------------------------
-% Funciones
+
+%% Funciones
 %--------------------------------------------------------------------------
 
 %% AddImageSatelite

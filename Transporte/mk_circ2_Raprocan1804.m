@@ -146,7 +146,7 @@ stnvel=ones(3300,nsta)*nan;
 ddeel=10;
 fprintf('    > Using a decimation rate of %d dbar',ddeel);
 for s = 1:nsta
-    [lat,lon,salt,temp,pres,ptemp,sgth,gamma,dh,ppllpp]=get_stas_Raprocan1804(indir,ctrls(s,[1 2]),ddeel);
+    [lat,lon,salt,temp,pres,ptemp,sgth,gamma,dh,ppllpp]=get_stas_A105(indir,ctrls(s,[1 2]),ddeel);
     %calculate a geostrophic velocity profile
     if strcmp(ref_param,'pres')
         eval(['ref_sfc = ',ref_param,';']);

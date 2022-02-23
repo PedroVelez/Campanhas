@@ -26,9 +26,9 @@ m_plot(360+lon,lat,'ob-','markersize',6);hold on
 
 
 for ii=1:length(lat)
-    if isfield('P','name')
+    %if isfield('P','Name')
         disp(sprintf('%s;%7.4f;%7.4f;1',deblank(P.Name{ii}),lon(ii),lat(ii)))
-    else
-        disp(sprintf('%s;%7.4f;%7.4f;1',deblank(''),lon(ii),lat(ii)))
-    end
+    %else
+    %    disp(sprintf('%s;%7.4f;%7.4f;1',deblank(''),lon(ii),lat(ii)))
+    %end
 end

@@ -180,7 +180,6 @@ end
 ylabel(Opciones.ytitulo,'FontSize',12)
 xlabel(Opciones.xtitulo,'FontSize',12)
 
-
 ax3=colorbar;
 set(ax1,'position',[0.13 0.715  0.67  0.20],'FontSize',12);
 set(ax2,'position',[0.13 0.100  0.67  0.58],'FontSize',12);
@@ -188,10 +187,9 @@ set(ax3,'position',[0.83 0.100  0.06  0.82],'FontSize',12);
 
 fprintf('     >%s %s, Max:%6.3f, Min:%6.3f\n',Opciones.titulo,Opciones.ztitulo,max(zvar(:)),min(zvar(:)))
 
-if strcmp(Opciones.tipo,'Z')
+if strcmp(Opciones.tipo,'T')
     datetick('keeplimits')
 end
-
 
 if exist('./Secciones','dir')==0
     mkdir('.Secciones')
@@ -202,13 +200,11 @@ CreaFigura(gcf,deblankT(fullfile('Secciones',strcat(Opciones.titulo,Opciones.zti
 end
 
 %%
-function x = nice(v,fac);
+function x = nice(v,fac)
 % NICE  'nice' scaling vector.
-%
 %  X = NICE(V), where V is a 2-element vector [A,B], returns
 %      an arbitrarily-but-nicely spaced vector X such that [A,B]
 %      is surrounded by the limits of X.
-%
 %  X = NICE(V,F) , where F is an integer, increases the resolution
 %      of X by a factor F.
 %
@@ -216,17 +212,14 @@ function x = nice(v,fac);
 %      and maximum value are used.
 %      If minimum and maximum of V are equal, a warning message is
 %      given.
-%
 %  Example:
 %	           x = nice( [0.72 2.39] )
 %	           y = nice( peaks )
 %  returns
 %	           x == [ 0.6  0.8  1.0  1.2  1.4  1.6  1.8  2.0  2.2  2.4 ] ,
 %	           y == [ -8  -6  -4  -2  0  2  4  6  8  10 ] .
-
 %  (c) 08-02-1995  Wolfgang Erasmi, Dept. Marine Physics, IfM Kiel, Germany
 %      werasmi@ifm.uni-kiel.d400.de
-
 %	Revised  31-08-1995  W. Erasmi
 %           Changes to make function work even for max == min
 %           and size(V) == [1 1].
@@ -238,7 +231,7 @@ mlbd2 = 1.8;	% boundary for 2nd increase of no.s of levels
 mfac2 = 5;		%     increasing factor for this case
 
 % error handling & defaults
-if nargin < 2,
+if nargin < 2
     mult = 1;		% default multiplier
 else
     mult = nanmax(fix(fac),1);
@@ -247,11 +240,11 @@ end
 a = min(min(v));    			% minimum
 b = max(max(v));  			% maximum
 
-if ( a == b ),
+if ( a == b )
     %	fprintf(1,'%c',7);	% beep
     disp(' ');
     disp('nice: Warning: Upper equals lower boundary.');
-    if a == 0,
+    if a == 0
         a = -1;	b = 1;
     else
         a = a - abs(a);
@@ -259,23 +252,22 @@ if ( a == b ),
     end
 end
 
-d = b-a;							% difference
+d = b-a;% difference
 od = round(log10(d)-0.5);	% order of magnitude of d; this looks somewhat
 % weird but has to be used instead of fix(log10(d))
 % because of numerical inaccuracy in log10.
 scal = 10^od;
-ds = d/scal;					% relative delta (between 0.1 and 1)
+ds = d/scal; % relative delta (between 0.1 and 1)
 
 % calculate stepwidth of vector; use stepwise increase of resolution,
 %                                if necessary
-if ds > mlbd1,
+if ds > mlbd1
     dlev = 1/mult * scal;
-elseif ds > mlbd2,
+elseif ds > mlbd2
     dlev = 1/(mult*mfac1) * scal;
 else
     dlev = 1/(mult*mfac2) * scal;
 end
-
 % create output vector
 lo = floor(a/dlev)*dlev;
 hi =  ceil(b/dlev)*dlev;
@@ -283,7 +275,7 @@ x = (lo:dlev:hi);
 end
 
 %%
-function [X] = extrem(P);
+function [X] = extrem(P)
 mi = nanmin(P(:));
 ma = nanmax(P(:));
 X = [mi ma];
